@@ -75,5 +75,9 @@ public class Vehicle {
 
   @Column
   private String foto3;
+
+  @Column
+  @NotBlank
+  private Boolean isActive;
   
 }

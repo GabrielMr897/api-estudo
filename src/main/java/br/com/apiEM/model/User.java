@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
 import lombok.Data;
@@ -32,13 +33,17 @@ public class User {
 
   @Column
   @NotBlank
-  private String login;
+  private String username;
 
 
   @Column
   @CPF
   @NotBlank
   private String cpf;
+
+  @Column
+  @Email
+  private String email;
   
 
   @Column(name = "name_c")
@@ -61,6 +66,10 @@ public class User {
   private String password;
 
   @Column
+  @NotBlank
+  private Boolean isActive;
+
+  @Column
   private String foto;
 
   @ManyToMany(fetch = FetchType.LAZY)
@@ -69,19 +78,41 @@ public class User {
 
 
 
-  public User(Long id, @NotBlank String login, @CPF @NotBlank String cpf, @NotBlank String nameC,
-      @NotBlank String number, @NotBlank @Past LocalDate dateOfBirth, @NotBlank String password, String foto,
-      Set<Role> roles) {
+
+
+
+ 
+
+
+
+
+
+
+  public User(Long id, @NotBlank String username, @CPF @NotBlank String cpf, @Email String email,
+      @NotBlank String nameC, @NotBlank String number, @NotBlank @Past LocalDate dateOfBirth, @NotBlank String password,
+      @NotBlank Boolean isActive, String foto, Set<Role> roles) {
     this.id = id;
-    this.login = login;
+    this.username = username;
     this.cpf = cpf;
+    this.email = email;
     this.nameC = nameC;
     this.number = number;
     this.dateOfBirth = dateOfBirth;
     this.password = password;
+    this.isActive = isActive;
     this.foto = foto;
     this.roles = roles;
   }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -89,5 +120,11 @@ public class User {
 
   }
 
+
+
+
+
+
+ 
   
 }
