@@ -79,5 +79,9 @@ public class Vehicle {
   @Column
   @NotBlank
   private Boolean isActive;
+
+  @Column
+  @NotBlank
+  private String doors;
   
 }
