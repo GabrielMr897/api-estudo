@@ -83,5 +83,11 @@ public class Vehicle {
   @Column
   @NotBlank
   private String doors;
+
+
+  @ManyToOne
+  @NotBlank
+  @JoinColumn(name = "created_user", referencedColumnName = "id")
+  private User user;
   
 }

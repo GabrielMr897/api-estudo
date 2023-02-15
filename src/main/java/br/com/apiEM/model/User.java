@@ -43,6 +43,7 @@ public class User {
 
   @Column
   @Email
+  @NotBlank
   private String email;
   
 
@@ -70,6 +71,7 @@ public class User {
   private Boolean isActive;
 
   @Column
+  @NotBlank
   private String foto;
 
   @ManyToMany(fetch = FetchType.LAZY)
