@@ -79,6 +79,7 @@ public class OpenApiConfig {
 						.contact(new Contact().name("Gabriel Martins").email("gabriel-pms@hotmai.com")));
 	}
 
+	
 	@Bean
 	public GroupedOpenApi vehicleApi() {
 		String[] paths = { "/api/vehicle/**" };
@@ -87,5 +88,12 @@ public class OpenApiConfig {
 				.pathsToMatch(paths)
 				.build();
 	}
-
+	@Bean
+	public GroupedOpenApi userApi() {
+		String[] paths = { "/api/user/**" };
+		return GroupedOpenApi.builder()
+				.group("Users")
+				.pathsToMatch(paths)
+				.build();
+	}
 }
