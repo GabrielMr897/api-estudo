@@ -66,7 +66,7 @@ public class User {
   @NotBlank
   private String password;
 
-  @Column
+  @Column(name = "is_active")
   @NotBlank
   private Boolean isActive;
 
@@ -82,18 +82,9 @@ public class User {
 
 
 
-
- 
-
-
-
-
-
-
-  public User(Long id, @NotBlank String username, @CPF @NotBlank String cpf, @Email String email,
+  public User(@NotBlank String username, @CPF @NotBlank String cpf, @Email String email,
       @NotBlank String nameC, @NotBlank String number, @NotBlank @Past LocalDate dateOfBirth, @NotBlank String password,
-      @NotBlank Boolean isActive, String foto, Set<Role> roles) {
-    this.id = id;
+      @NotBlank Boolean isActive, String foto) {
     this.username = username;
     this.cpf = cpf;
     this.email = email;
@@ -103,7 +94,7 @@ public class User {
     this.password = password;
     this.isActive = isActive;
     this.foto = foto;
-    this.roles = roles;
+   
   }
 
 

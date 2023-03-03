@@ -40,7 +40,7 @@ public class RefreshTokenService {
 
     User user = userRepository.findById(userId).get();
 
-    RefreshToken refreshTokenVeri = refreshTokenRepository.findByUserAndExpiryDateAfter(user, Instant.now());
+    RefreshToken refreshTokenVeri = refreshTokenRepository.findByUserAndExpiry(user, Instant.now());
 
     if(refreshTokenVeri != null) {
       return refreshTokenVeri;
