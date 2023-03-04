@@ -13,6 +13,7 @@
     "message" : "Internal Server Error!"
   },
   "badCredentialsResponse" : {
+    "path": "/api/authentication/sign-in",
     "error": "Unauthorized",
     "message": "Bad credentials",
     "Status": 401

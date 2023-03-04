@@ -86,6 +86,9 @@ public class AuthService {
     if (userRepository.existsByEmailIgnoreCase(signUpRequest.getEmail())) {
       throw new AuthException("Email is already in use!");
     }
+    if (userRepository.existsByCpf(signUpRequest.getCpf())) {
+      throw new AuthException("Cpf is already in use!");
+    }
 
     
 
