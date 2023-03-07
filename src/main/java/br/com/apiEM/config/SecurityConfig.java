@@ -90,6 +90,8 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.GET, "/api/vehicle/{id}").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/vehicle").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/user/loggedU").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/categories/{id}").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
         .requestMatchers(HttpMethod.POST, "/api/authentication/sign-in").permitAll()
         .requestMatchers(HttpMethod.POST, "/api/authentication/sign-up").permitAll()
         .requestMatchers(HttpMethod.POST, "/api/authentication/refreshtoken").permitAll()

@@ -104,12 +104,12 @@ public class OpenApiConfig {
 				.pathsToMatch(paths)
 				.build();
 	}
-	/*@Bean
+	@Bean
 	public GroupedOpenApi categoriesApi() {
-		String[] paths = { "/api/authentication/**" };
+		String[] paths = { "/api/categories/**" };
 		return GroupedOpenApi.builder()
 				.group("Categories")
 				.pathsToMatch(paths)
 				.build();
-	}*/
+	}
 }
