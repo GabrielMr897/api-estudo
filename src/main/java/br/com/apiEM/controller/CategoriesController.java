@@ -1,5 +1,6 @@
 package br.com.apiEM.controller;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.apiEM.exception.CategoriesException;
@@ -80,9 +83,9 @@ public class CategoriesController {
       @ApiResponse(responseCode = "422", ref = "unprocessableEntity"),
       @ApiResponse(responseCode = "500", ref = "internalServerError")
   })
-  public ResponseEntity<Object> insert(@Valid @RequestBody Categories categories) {
+  public ResponseEntity<Object> insert(@Valid @RequestBody Categories categories, @RequestParam(name = "file") MultipartFile file) throws IOException {
     try {
-      Categories response = categoriesService.registerCategories(categories);
+      Categories response = categoriesService.registerCategories(categories, file);
       URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
           .buildAndExpand(response.getId())
           .toUri();
@@ -137,6 +140,25 @@ public class CategoriesController {
     } catch (CategoriesException | DataIntegrityViolationException e) {
       return ResponseEntity.unprocessableEntity()
           .body(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+    }
+  }
+
+  @PreAuthorize("hasRole('ADMIN')")
+  @PutMapping("/updateImg")
+  @SecurityRequirement(name = "token")
+  @Operation(summary = "Update Image categories",responses = {
+    @ApiResponse(responseCode = "200", description = "Successfully update image user!", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Categories.class))),
+    @ApiResponse(responseCode = "400", ref = "BadRequest"),
+    @ApiResponse(responseCode = "401", ref = "badcredentials"),
+    @ApiResponse(responseCode = "403", ref = "forbidden"),
+    @ApiResponse(responseCode = "422", ref = "unprocessableEntity"),
+    @ApiResponse(responseCode = "500", ref = "internalServerError")
+})
+  public ResponseEntity<Object> updateUImg(@RequestParam(name = "file") MultipartFile file, @PathVariable Long id) throws IOException {
+    try {
+      return ResponseEntity.ok(categoriesService.updFotoCategories(id, file));
+    } catch(CategoriesException u) {
+      return ResponseEntity.unprocessableEntity().body(HttpStatus.SC_UNPROCESSABLE_ENTITY);
     }
   }
 

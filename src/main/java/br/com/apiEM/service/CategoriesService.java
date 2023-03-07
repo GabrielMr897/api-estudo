@@ -1,9 +1,11 @@
 package br.com.apiEM.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.apiEM.exception.CategoriesException;
 import br.com.apiEM.model.Categories;
@@ -15,6 +17,9 @@ public class CategoriesService {
   
   @Autowired
   private CategoriesRepository categoriesRepository;
+
+  @Autowired
+  private FirebaseService firebaseService;
 
 
 
@@ -30,13 +35,15 @@ public class CategoriesService {
   }
 
   @Transactional
-  public Categories registerCategories(Categories categories) {
+  public Categories registerCategories(Categories categories, MultipartFile file) throws IOException {
 
     if(categoriesRepository.existsByNameIgnoreCase(categories.getName())) {
       throw new CategoriesException("name already exists, " + categories.getName());
     }
 
+    String foto = firebaseService.saveFile(file);
     Categories c = new Categories();
+    c.setFoto(foto);
     c.setName(categories.getName());  
     c = categoriesRepository.save(c);
 
@@ -57,6 +64,19 @@ public class CategoriesService {
     c = categoriesRepository.save(c);
 
     return c;
+  }
+
+  @Transactional
+  public Categories updFotoCategories(Long id, MultipartFile file) throws IOException {
+
+    Categories categories = categoriesRepository.findById(id).orElseThrow(() -> new CategoriesException("not find id, " + id));
+    
+    String foto = firebaseService.saveFile(file);
+    categories.setFoto(foto);
+
+    categories = categoriesRepository.save(categories);
+
+    return categories;
   }
 
 

@@ -140,7 +140,7 @@ public class UserController {
     @ApiResponse(responseCode = "422", ref = "unprocessableEntity"),
     @ApiResponse(responseCode = "500", ref = "internalServerError")
 })
-  public ResponseEntity<Object> updateUImg(@PathVariable Long id, @RequestParam(name = "file") MultipartFile file) throws IOException {
+  public ResponseEntity<Object> updateUImg(@RequestParam(name = "file") MultipartFile file) throws IOException {
     try {
       return ResponseEntity.ok(userService.updateUImg(file));
     } catch(UserException u) {

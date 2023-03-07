@@ -25,7 +25,11 @@ public class Categories {
   @Column
   @NotBlank
   private String name;
+
   
+  @Column
+  private String foto;
+
   @OneToMany(mappedBy = "categories")
   private List<Vehicle> vehicles;
 }
