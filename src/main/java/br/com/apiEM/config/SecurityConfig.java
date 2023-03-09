@@ -25,7 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.apiEM.service.UserDetailsImpService;
-import br.com.apiEM.utils.AuthenticationEntryJwt;
+import br.com.apiEM.utils.AuthenticationEntryPointJwt;
 import br.com.apiEM.utils.AuthenticationTokenFilter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,7 +38,7 @@ public class SecurityConfig {
   UserDetailsImpService userDetailsImpService;
 
   @Autowired
-  private AuthenticationEntryJwt unauthorizedHandler;
+  private AuthenticationEntryPointJwt unauthorizedHandler;
 
   @Bean
   public AuthenticationTokenFilter authenticationJwtTokenFilter() {

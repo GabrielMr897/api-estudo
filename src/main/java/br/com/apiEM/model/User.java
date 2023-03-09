@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.hibernate.validator.constraints.br.CPF;
 
+import com.google.firebase.database.annotations.NotNull;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,6 +18,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
@@ -24,7 +27,10 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "user_login")
+@Table(name = "user_login", uniqueConstraints = {
+  @UniqueConstraint(columnNames = "username"),
+  @UniqueConstraint(columnNames = "email")
+})
 public class User {
   
   @Id
@@ -58,7 +64,7 @@ public class User {
 
 
   @Column(name = "date_of_birth")
-  @NotBlank
+  @NotNull
   @Past
   private LocalDate dateOfBirth;
 
@@ -67,7 +73,7 @@ public class User {
   private String password;
 
   @Column(name = "is_active")
-  @NotBlank
+  @NotNull
   private Boolean isActive;
 
   @Column
@@ -83,7 +89,7 @@ public class User {
 
 
   public User(@NotBlank String username, @CPF @NotBlank String cpf, @Email String email,
-      @NotBlank String nameC, @NotBlank String number, @NotBlank @Past LocalDate dateOfBirth, @NotBlank String password,
+      @NotBlank String nameC, @NotBlank String number, @NotNull @Past LocalDate dateOfBirth, @NotBlank String password,
       @NotBlank Boolean isActive, String foto) {
     this.username = username;
     this.cpf = cpf;

@@ -34,197 +34,189 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class AuthService {
-  
-  @Autowired
-  private UserRepository userRepository;
 
-  @Autowired
-  private RoleRepository roleRepository;
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
-  @Autowired
-  private AuthenticationManager authenticationManager;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-  @Autowired
-  private PasswordEncoder encoder;
+    @Autowired
+    private UserRepository userRepository;
 
-  @Autowired
-  private JwtUtils jwtUtils;
+    @Autowired
+    private RoleRepository roleRepository;
 
-  @Autowired
-  private RefreshTokenService refreshTokenService;
+    @Autowired
+    private PasswordEncoder encoder;
 
+    @Autowired
+    private JwtUtils jwtUtils;
 
-  @Transactional
-  public SignupResponseDTO authenticateUser(LoginRequestDTO loginRequest) {
-    Authentication authentication = authenticationManager
-        .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+    @Transactional
+    public SignupRegisterResponseDTO registerUser(SignupRequestDTO signUpRequest) {
+        System.out.println("entrei");
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            throw new AuthException("Error: Username já em uso!");
+        }
 
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (userRepository.existsByEmailIgnoreCase(signUpRequest.getEmail())) {
+            throw new AuthException("Error: Email já em uso!");
+        }
 
-    UserDetailsImp userDetails = (UserDetailsImp) authentication.getPrincipal();
+        User user = new User();
+        user.setUsername(signUpRequest.getUsername());
+        user.setEmail(signUpRequest.getEmail());
+        user.setPassword(encoder.encode(signUpRequest.getPassword()));
+        user.setCpf(signUpRequest.getCpf());
+        user.setDateOfBirth(signUpRequest.getDateOfBirth());
+        user.setNameC(signUpRequest.getNameC());
+        user.setNumber(signUpRequest.getNumber());
+        user.setFoto("https://th.bing.com/th/id/R.7042e85177b903f3ccd72d77daf9824e?rik=rKmaAIgN5Aua0g&pid=ImgRaw&r=0");
+        user.setIsActive(true);
 
-    String jwt = jwtUtils.generateJwtToken(userDetails);
+        Set<Role> roles = new HashSet<>();
 
-    List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-        .collect(Collectors.toList());
+        Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        roles.add(userRole);
 
-    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        user.setRoles(roles);
+        System.out.println(user);
+        userRepository.save(user);
 
-   
+        List<RoleEnum> rolesList = roles.stream().map(Role::getName).collect(Collectors.toList());
 
-    return new SignupResponseDTO(jwt, refreshToken.getToken(), userDetails.getId(), userDetails.getUsername(),
-        userDetails.getEmail(), roles);
-  }
-
-
-  @Transactional
-  public SignupRegisterResponseDTO registerUser(SignupRequestDTO signUpRequest) {
-    if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-      throw new AuthException("Username is already taken!");
+        return new SignupRegisterResponseDTO(user, rolesList);
     }
 
-    if (userRepository.existsByEmailIgnoreCase(signUpRequest.getEmail())) {
-      throw new AuthException("Email is already in use!");
-    }
-    if (userRepository.existsByCpf(signUpRequest.getCpf())) {
-      throw new AuthException("Cpf is already in use!");
-    }
-
-    
-
-    User user = new User(signUpRequest.getUsername(), signUpRequest.getCpf(), signUpRequest.getEmail(),
-    signUpRequest.getNameC(), signUpRequest.getNumber(), signUpRequest.getDateOfBirth(), encoder.encode(signUpRequest.getPassword()),
-    true, "https://th.bing.com/th/id/R.7042e85177b903f3ccd72d77daf9824e?rik=rKmaAIgN5Aua0g&pid=ImgRaw&r=0");
-
-    Set<Role> roles = new HashSet<>();
-
-    Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER)
-        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-    roles.add(userRole);
-
-    user.setRoles(roles);
-    userRepository.save(user);
-
-    List<RoleEnum> rolesList = roles.stream().map(Role::getName).collect(Collectors.toList());
-
-   
-
-    return new SignupRegisterResponseDTO(user, rolesList);
-  }
-
-  @Transactional
-  public SignupRegisterResponseDTO newRoles(RoleRequestDTO rolesI, Long idUsuario) {
-    Optional<User> user = userRepository.findById(idUsuario);
-
-    if (!user.isPresent()) {
-      throw new AuthException("Error: User notFound");
+    @Transactional
+    public String logoutUser() {
+        UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        Long userId = userDetails.getId();
+        refreshTokenService.deleteByUserId(userId);
+        return "Log out successful!";
     }
 
-    Set<String> strRoles = rolesI.getRoles();
-    Set<Role> roles = new HashSet<>();
+    @Transactional
+    public RefreshTokenResponseDTO refreshtoken(RefreshTokenRequestDTO request) {
+        String requestRefreshToken = request.getRefreshToken();
 
-    for (String role : strRoles) {
-      RoleEnum roleE;
-      switch (role) {
-        case "admin":
-          roleE = RoleEnum.ROLE_ADMIN;
-          break;
-        case "vendor": 
-          roleE = RoleEnum.ROLE_VENDOR;
-          break;
-        default:
-          roleE = RoleEnum.ROLE_USER;
-      }
-      Role foundRole = roleRepository.findByName(roleE)
-          .orElseThrow(() -> new AuthException("Role is not found."));
-      roles.add(foundRole);
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    if (!user.getIsActive()) {
+                        refreshTokenService.deleteByUserId(user.getId());
+                        throw new RefreshTokenException(requestRefreshToken, "Refresh token is not in database!");
+                    }
+                    String token = jwtUtils.generateTokenFromUsername(user.getUsername(), user.getId());
+                    List<Role> roles = user.getRoles().stream().collect(Collectors.toList());
+                    List<RoleEnum> rolesList = roles.stream().map(Role::getName).collect(Collectors.toList());
+                    return new RefreshTokenResponseDTO(token, requestRefreshToken, user.getId(),
+                            user.getUsername(), user.getEmail(), rolesList);
+                })
+                .orElseThrow(() -> new RefreshTokenException(requestRefreshToken,
+                        "Refresh token is not in database!"));
     }
 
-    Set<Role> currentRoles = user.get().getRoles();
-    currentRoles.addAll(roles);
-    user.get().setRoles(currentRoles);
-    userRepository.save(user.get());
+    @Transactional
+    public SignupRegisterResponseDTO removeRoles(RoleRequestDTO rolesIn, Long idUsuario) {
+        Optional<User> user = userRepository.findById(idUsuario);
 
-    List<RoleEnum> rolesList = currentRoles.stream().map(Role::getName).collect(Collectors.toList());
+        if (!user.isPresent()) {
+            throw new AuthException("Error: User notFound");
+        }
 
-    return new SignupRegisterResponseDTO(user.get(), rolesList);
-  }
+        Set<String> strRoles = rolesIn.getRoles();
+        Set<Role> roles = new HashSet<>();
 
-  @Transactional
-  public SignupRegisterResponseDTO removeRoles(RoleRequestDTO rolesIn, Long idUsuario) {
-    Optional<User> user = userRepository.findById(idUsuario);
+        for (String role : strRoles) {
+            RoleEnum roleE;
+            switch (role) {
+                case "admin":
+                    roleE = RoleEnum.ROLE_ADMIN;
+                    break;
+                default:
+                    roleE = null;
+            }
+            Role foundRole = roleRepository.findByName(roleE)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(foundRole);
+        }
 
-    if (!user.isPresent()) {
-      throw new AuthException("User not found");
+        Set<Role> currentRoles = user.get().getRoles();
+        for (Role role : roles) {
+            if (role.getName().equals(RoleEnum.ROLE_USER) && !currentRoles.contains(role)) {
+                throw new AuthException("Error: ROLE_USER cannot be removed");
+            }
+        }
+
+        currentRoles.removeAll(roles);
+        user.get().setRoles(currentRoles);
+        userRepository.save(user.get());
+
+        List<RoleEnum> rolesList = currentRoles.stream().map(Role::getName).collect(Collectors.toList());
+
+        return new SignupRegisterResponseDTO(user.get(), rolesList);
     }
 
-    Set<String> strRoles = rolesIn.getRoles();
-    Set<Role> roles = new HashSet<>();
+    @Transactional
+    public SignupRegisterResponseDTO newRoles(RoleRequestDTO rolesIn, Long idUsuario) {
+        Optional<User> user = userRepository.findById(idUsuario);
 
-    for (String role : strRoles) {
-      RoleEnum roleE;
-      switch (role) {
-        case "admin":
-          roleE = RoleEnum.ROLE_ADMIN;
-          break;
-        case "vendor":
-          roleE = RoleEnum.ROLE_VENDOR;
-          break;
-        default:
-          roleE = null;
-      }
-      Role foundRole = roleRepository.findByName(roleE)
-          .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-      roles.add(foundRole);
+        if (!user.isPresent()) {
+            throw new AuthException("Error: User notFound");
+        }
+
+        Set<String> strRoles = rolesIn.getRoles();
+        Set<Role> roles = new HashSet<>();
+
+        for (String role : strRoles) {
+            RoleEnum roleE;
+            switch (role) {
+                case "admin":
+                    roleE = RoleEnum.ROLE_ADMIN;
+                    break;
+                default:
+                    roleE = RoleEnum.ROLE_USER;
+            }
+            Role foundRole = roleRepository.findByName(roleE)
+                    .orElseThrow(() -> new AuthException("Error: Role is not found."));
+            roles.add(foundRole);
+        }
+
+        Set<Role> currentRoles = user.get().getRoles();
+        currentRoles.addAll(roles);
+        user.get().setRoles(currentRoles);
+        userRepository.save(user.get());
+
+        List<RoleEnum> rolesList = currentRoles.stream().map(Role::getName).collect(Collectors.toList());
+
+        return new SignupRegisterResponseDTO(user.get(), rolesList);
     }
 
-    Set<Role> currentRoles = user.get().getRoles();
-    for (Role role : roles) {
-      if (role.getName().equals(RoleEnum.ROLE_USER) && !currentRoles.contains(role)) {
-        throw new AuthException("role user cannot be removed");
-      }
+    @Transactional
+    public SignupResponseDTO authenticateUser(LoginRequestDTO loginRequest) {
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                        loginRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        UserDetailsImp userDetails = (UserDetailsImp) authentication.getPrincipal();
+
+        String jwt = jwtUtils.generateJwtToken(userDetails);
+
+        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
+        return new SignupResponseDTO(jwt, refreshToken.getToken(), userDetails.getId(), userDetails.getUsername(),
+                userDetails.getEmail(), roles);
     }
-
-    currentRoles.removeAll(roles);
-    user.get().setRoles(currentRoles);
-    userRepository.save(user.get());
-
-    List<RoleEnum> rolesList = currentRoles.stream().map(Role::getName).collect(Collectors.toList());
-
-    return new SignupRegisterResponseDTO(user.get(), rolesList);
-  }
-
-
-  @Transactional
-  public RefreshTokenResponseDTO refreshtoken(RefreshTokenRequestDTO request) {
-    String requestRefreshToken = request.getRefreshToken();
-
-    return refreshTokenService.findByToken(requestRefreshToken)
-        .map(refreshTokenService::verifyExpiration)
-        .map(RefreshToken::getUser)
-        .map(user -> {
-          if (!user.getIsActive()) {
-            refreshTokenService.deleteByUserId(user.getId());
-            throw new RefreshTokenException(requestRefreshToken, "Refresh token is not in database!");
-          }
-          String token = jwtUtils.generateTokenFromUsername(user.getUsername(), user.getId());
-          List<Role> roles = user.getRoles().stream().collect(Collectors.toList());
-          List<RoleEnum> rolesList = roles.stream().map(Role::getName).collect(Collectors.toList());
-          return new RefreshTokenResponseDTO(token, requestRefreshToken, user.getId(),
-              user.getUsername(), user.getEmail(), rolesList);
-        })
-        .orElseThrow(() -> new RefreshTokenException(requestRefreshToken,
-            "Refresh token is not in database!"));
-  }
-
-
-  @Transactional
-  public String logoutUser() {
-    UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
-    Long userId = userDetails.getId();
-    refreshTokenService.deleteByUserId(userId);
-    return "Log out successful!";
-  }
 
 }
