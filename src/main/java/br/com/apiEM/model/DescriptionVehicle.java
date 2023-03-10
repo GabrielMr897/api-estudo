@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -21,14 +23,16 @@ public class DescriptionVehicle {
   @Column
   @NotBlank
   private String description;
-/*
-  @Column
+  
+  @ManyToOne
   @JoinColumn(name = "id_vehicle", referencedColumnName = "id")
-  private Vehicle vehicle;*/
+  private Vehicle vehicle;
 
-  public DescriptionVehicle(Long id, @NotBlank String description) {
+  public DescriptionVehicle(Long id, @NotBlank String description, Vehicle vehicle) {
     this.id = id;
     this.description = description;
-   
+    this.vehicle = vehicle;
   }
+
+  
 }
