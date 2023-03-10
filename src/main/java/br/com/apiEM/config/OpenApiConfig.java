@@ -112,4 +112,12 @@ public class OpenApiConfig {
 				.pathsToMatch(paths)
 				.build();
 	}
+	@Bean
+	public GroupedOpenApi descVApi() {
+		String[] paths = { "/api/descV/**" };
+		return GroupedOpenApi.builder()
+				.group("Description Vehicle")
+				.pathsToMatch(paths)
+				.build();
+	}
 }
