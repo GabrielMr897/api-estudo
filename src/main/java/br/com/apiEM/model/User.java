@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.br.CPF;
 
 import com.google.firebase.database.annotations.NotNull;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
@@ -85,7 +87,9 @@ public class User {
   private Set<Role> roles = new HashSet<>();
 
 
-
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+  @JoinColumn(name = "address_id")
+  private Address address;
 
 
   public User(@NotBlank String username, @CPF @NotBlank String cpf, @Email String email,

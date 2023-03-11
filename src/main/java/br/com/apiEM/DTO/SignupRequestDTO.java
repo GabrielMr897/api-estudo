@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.hibernate.validator.constraints.br.CPF;
 
+import br.com.apiEM.model.Address;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -40,5 +41,8 @@ public class SignupRequestDTO {
   @NotNull
   @Past
   private LocalDate dateOfBirth;
+
+
+  private Address address;
 
 }

@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -39,12 +37,11 @@ public class Address {
 
   private String complement;
 
-  @OneToOne
-  @JoinColumn(name = "id_user", referencedColumnName = "id")
-  private User user;
+  private Boolean isActive;
+
 
   public Address(Long id, @Size(max = 2, min = 2) String uf, String city, String cep, String neighborhood,
-      String street, String number, String complement, User user) {
+      String street, String number, String complement) {
     this.id = id;
     this.uf = uf;
     this.city = city;
@@ -53,7 +50,6 @@ public class Address {
     this.street = street;
     this.number = number;
     this.complement = complement;
-    this.user = user;
   }
   
 }

@@ -24,6 +24,7 @@ import br.com.apiEM.DTO.SignupResponseDTO;
 import br.com.apiEM.enums.RoleEnum;
 import br.com.apiEM.exception.AuthException;
 import br.com.apiEM.exception.RefreshTokenException;
+import br.com.apiEM.model.Address;
 import br.com.apiEM.model.RefreshToken;
 import br.com.apiEM.model.Role;
 import br.com.apiEM.model.User;
@@ -43,6 +44,9 @@ public class AuthService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AddressService addressService;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -75,6 +79,8 @@ public class AuthService {
         user.setFoto("https://th.bing.com/th/id/R.7042e85177b903f3ccd72d77daf9824e?rik=rKmaAIgN5Aua0g&pid=ImgRaw&r=0");
         user.setIsActive(true);
 
+        Address address = addressService.register(signUpRequest.getAddress());
+
         Set<Role> roles = new HashSet<>();
 
         Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER)
@@ -82,7 +88,7 @@ public class AuthService {
         roles.add(userRole);
 
         user.setRoles(roles);
-        System.out.println(user);
+        user.setAddress(address);
         userRepository.save(user);
 
         List<RoleEnum> rolesList = roles.stream().map(Role::getName).collect(Collectors.toList());

@@ -19,8 +19,7 @@ public class UserService {
   
   @Autowired
   private UserRepository userRepository;
-
-  
+ 
   @Autowired
   private PasswordEncoder encoder;
 
@@ -67,7 +66,6 @@ public class UserService {
         User userId = userRepository.findById(userDetails.getId())
         .orElseThrow(() -> new UserException( "not find user id, " + userDetails.getId()));
 
-      
       if(!user.getUsername().equalsIgnoreCase(user.getUsername()) && userRepository.existsByUsername(user.getUsername())) {
         throw new UserException("Username already exists, username: " + user.getUsername());
       }
@@ -83,6 +81,10 @@ public class UserService {
 
       if(user.getNumber() != null) {
         userId.setNumber(user.getNumber());
+      }
+
+      if(user.getAddress() != null) {
+        userId.setAddress(user.getAddress());
       }
 
       userId = userRepository.save(userId);
