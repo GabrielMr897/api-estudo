@@ -95,7 +95,7 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.POST, "/api/authentication/sign-in").permitAll()
         .requestMatchers(HttpMethod.POST, "/api/authentication/sign-up").permitAll()
         .requestMatchers(HttpMethod.POST, "/api/authentication/refreshtoken").permitAll()
-        .requestMatchers("/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
+        .requestMatchers("/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/api-estudo-production.up.railway.app/**").permitAll()
         .anyRequest()
         .authenticated().and().exceptionHandling().accessDeniedHandler(new AccessDeniedHandlerImpl()).and()
         .sessionManagement()
