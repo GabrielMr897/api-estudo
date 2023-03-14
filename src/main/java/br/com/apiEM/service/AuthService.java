@@ -145,6 +145,9 @@ public class AuthService {
                 case "admin":
                     roleE = RoleEnum.ROLE_ADMIN;
                     break;
+                case "vendor":
+                    roleE = RoleEnum.ROLE_VENDOR;
+                    break;
                 default:
                     roleE = null;
             }
@@ -185,6 +188,9 @@ public class AuthService {
             switch (role) {
                 case "admin":
                     roleE = RoleEnum.ROLE_ADMIN;
+                    break;
+                case "vendor":
+                    roleE = RoleEnum.ROLE_VENDOR;
                     break;
                 default:
                     roleE = RoleEnum.ROLE_USER;

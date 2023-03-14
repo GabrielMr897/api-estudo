@@ -92,9 +92,19 @@ public class User {
   private Address address;
 
 
-  public User(@NotBlank String username, @CPF @NotBlank String cpf, @Email String email,
-      @NotBlank String nameC, @NotBlank String number, @NotNull @Past LocalDate dateOfBirth, @NotBlank String password,
-      @NotBlank Boolean isActive, String foto) {
+
+
+
+
+
+
+
+
+
+  public User(Long id, @NotBlank String username, @CPF @NotBlank String cpf, @Email @NotBlank String email,
+      @NotBlank String nameC, @NotBlank String number, @Past LocalDate dateOfBirth, @NotBlank String password,
+      Boolean isActive, @NotBlank String foto, Set<Role> roles, Address address) {
+    this.id = id;
     this.username = username;
     this.cpf = cpf;
     this.email = email;
@@ -104,10 +114,9 @@ public class User {
     this.password = password;
     this.isActive = isActive;
     this.foto = foto;
-   
+    this.roles = roles;
+    this.address = address;
   }
-
-
 
 
 

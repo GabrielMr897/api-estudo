@@ -40,6 +40,10 @@ public class Address {
   private Boolean isActive;
 
 
+  public Address() {
+  }
+
+
   public Address(Long id, @Size(max = 2, min = 2) String uf, String city, String cep, String neighborhood,
       String street, String number, String complement) {
     this.id = id;
