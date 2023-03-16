@@ -18,6 +18,7 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.servers.Server;
 
 @OpenAPIDefinition
 @Configuration
@@ -71,7 +72,7 @@ public class OpenApiConfig {
 		components.addResponses("unprocessableEntity", unprocessableEntityAPI);
 		components.addResponses("internalServerError", internalServerErrorAPI);
 
-		return new OpenAPI().addServersItem(new Server().url("https://api-estudo-production.up.railway.app/))
+		return new OpenAPI().addServersItem(new Server().url("https://api-estudo-production.up.railway.app/"))
 				.components(components)
 				.info(new Info().title("Api Estudo")
 						.version("V0.0.1")
