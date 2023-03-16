@@ -71,7 +71,7 @@ public class OpenApiConfig {
 		components.addResponses("unprocessableEntity", unprocessableEntityAPI);
 		components.addResponses("internalServerError", internalServerErrorAPI);
 
-		return new OpenAPI()
+		return new OpenAPI().addServersItem(new Server().url("https://api-estudo-production.up.railway.app/))
 				.components(components)
 				.info(new Info().title("Api Estudo")
 						.version("V0.0.1")
